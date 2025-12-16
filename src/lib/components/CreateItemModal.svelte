@@ -36,7 +36,7 @@
 ></button>
 
 <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-    <div class="bg-card p-4 rounded-xl ">
+    <div class="bg-card p-4 sm:p-6 rounded-xl w-full max-w-md sm:max-w-lg">
         <h3 class="text-lg font-semibold mb-4">{t('create')}</h3>
 
         <input

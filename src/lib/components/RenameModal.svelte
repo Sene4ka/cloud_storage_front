@@ -46,8 +46,9 @@
 ></button>
 
 <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-    <div class="w-96 rounded-xl p-6" style="background: var(--color-card);">
-        <h3 class="text-lg font-semibold mb-4">Переименовать</h3>
+    <div class="w-full max-w-md sm:max-w-lg md:max-w-xl rounded-xl p-4 sm:p-6"
+         style="background: var(--color-card);">
+        <h3 class="text-lg font-semibold mb-4">{t('rename')}</h3>
 
         <input
                 class="w-full p-2 bg-surface rounded-lg"

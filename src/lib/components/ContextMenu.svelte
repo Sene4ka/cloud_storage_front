@@ -29,6 +29,12 @@
     onMount(() => {
         menuEl?.focus();
     });
+
+    let left = $state(0), top = $state(0);
+    onMount(() => {
+        left = Math.min(x, (window?.innerWidth ?? 800) - 200);
+        top = Math.min(y, (window?.innerHeight ?? 600) - 300);
+    });
 </script>
 
 <button
@@ -40,8 +46,9 @@
 
 <div
         bind:this={menuEl}
-        class="fixed z-50 rounded-lg shadow-lg bg-card p-1 min-w-[160px] outline-none"
-        style="left: {x}px; top: {y}px;"
+        class="fixed z-50 rounded-lg shadow-lg bg-card p-1 min-w-[140px] sm:min-w-[160px] outline-none
+           max-w-[90vw] sm:max-w-none"
+        style="left: {left}px; top: {top}px;"
         role="menu"
         tabindex="0"
         onkeydown={handleKey}

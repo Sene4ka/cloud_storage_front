@@ -45,6 +45,7 @@ const dict = {
         file: 'File',
         dir: 'Folder',
         open: 'Open',
+        sortBy: 'Sort by',
     },
     ru: {
         login: 'Вход',
@@ -90,6 +91,7 @@ const dict = {
         file: 'Файл',
         dir: 'Папка',
         open: 'Открыть',
+        sortBy: 'Упорядочить по',
     }
 } as const;
 

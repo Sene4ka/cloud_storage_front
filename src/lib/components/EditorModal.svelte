@@ -51,7 +51,9 @@
 
 <div
         bind:this={dialogEl}
-        class="fixed inset-0 z-50 m-auto max-w-3xl h-[70vh] bg-card rounded-xl p-4 flex flex-col outline-none"
+        class="fixed inset-0 z-50 m-auto max-w-3xl h-[70vh] bg-card rounded-xl p-4 flex flex-col outline-none
+        w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] xl:max-w-3xl
+        h-[85vh] sm:h-[80vh] md:h-[75vh] lg:h-[70vh]"
         role="dialog"
         aria-modal="true"
         tabindex="0"

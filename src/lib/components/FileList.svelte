@@ -35,7 +35,9 @@
     let showCreate = $state(false);
 
     onMount(() => {
-        window.addEventListener('ui:create', () => showCreate = true);
+        const onCreate = () => showCreate = true;
+        window.addEventListener('ui:create', onCreate);
+        return () => window.removeEventListener('ui:create', onCreate);
     });
 
     async function load(): Promise<void> {
@@ -249,191 +251,258 @@
         if (!ts) return '-';
         return new Date(ts).toLocaleString();
     }
+    let isMobile = $state(false);
+
+    onMount(() => {
+        const checkMobile = () => {
+            isMobile = window.innerWidth < 768;
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => {
+            window.removeEventListener('resize', checkMobile);
+        };
+    });
 </script>
 
-<div class="flex flex-col h-full p-6 space-y-4 rounded-xl"
+<div class="flex flex-col h-full p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 rounded-xl"
      class:ring-2={dragOver}
      class:ring-primary={dragOver}
      ondragover={handleDragOver}
      ondragleave={handleDragLeave}
      ondrop={handleDrop}
      aria-label="File Drop">
-    <div class="p-4 bg-card rounded-xl border border-border">
-        <div class="flex items-center space-x-2 text-sm text-text">
+
+    <div class="p-3 sm:p-4 bg-card rounded-lg sm:rounded-xl border border-border">
+        <div class="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-text overflow-x-auto pb-1">
             {#each path as part, i}
                 <button
                         type="button"
-                        class="hover:opacity-70 transition-opacity rounded px-1"
+                        class="hover:opacity-70 transition-opacity rounded px-1 py-0.5 sm:py-1 whitespace-nowrap"
                         ondragover={(e) => e.preventDefault()}
                         class:bg-card-hover={draggingId}
                         class:ring-1={draggingId}
                         ondrop={async (e) => {
-                    e.preventDefault();
-                    if (!draggingId) return;
-
-                    await api.moveFile(draggingId, part.id);
-                    draggingId = null;
-                    await load();
-                }}
-                        onclick={() => {
-                    if (i < path.length - 1) {
-                        path = path.slice(0, i + 1);
-                        currentParent = part.id;
-                        currentPage = 1;
-                        load();
-                    }
-                }}
-                        onkeydown={(e) => {
-                    if ((e.key === 'Enter' || e.key === ' ') && i < path.length - 1) {
                         e.preventDefault();
-                        path = path.slice(0, i + 1);
-                        currentParent = part.id;
-                        currentPage = 1;
-                        load();
-                    }
-                }}
+                        if (!draggingId) return;
+                        await api.moveFile(draggingId, part.id);
+                        draggingId = null;
+                        await load();
+                    }}
+                        onclick={() => {
+                        if (i < path.length - 1) {
+                            path = path.slice(0, i + 1);
+                            currentParent = part.id;
+                            currentPage = 1;
+                            load();
+                        }
+                    }}
+                        onkeydown={(e) => {
+                        if ((e.key === 'Enter' || e.key === ' ') && i < path.length - 1) {
+                            e.preventDefault();
+                            path = path.slice(0, i + 1);
+                            currentParent = part.id;
+                            currentPage = 1;
+                            load();
+                        }
+                    }}
                 >
                     {part.name}
                 </button>
-
                 {#if i < path.length - 1}
-                    <span class="text-text-secondary">/</span>
+                    <span class="text-text-secondary flex-shrink-0">/</span>
                 {/if}
             {/each}
         </div>
     </div>
 
-    <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-text">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
+        <h2 class="text-base sm:text-lg font-semibold text-text whitespace-nowrap">
             {items.length} {items.length === 1 ? t('itemOne') : (items.length >= 5 ? t('items') : t('item'))}
         </h2>
-        <div class="flex items-center space-x-4 text-secondary">
-            <div class="text-sm">Sort by:</div>
-            <button
-                    class="text-sm px-3 py-1 rounded-lg transition-colors"
-                    class:font-medium={sortBy === 'name'}
-                    style="background: {sortBy === 'name' ? 'var(--color-primary)' : 'var(--color-surface)'}; color: {sortBy === 'name' ? 'white' : 'var(--color-text)'};"
-                    onclick={() => handleSort('name')}
-                    type="button"
-            >
-                {t('name')} {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </button>
-            <button
-                    class="text-sm px-3 py-1 rounded-lg transition-colors"
-                    class:font-medium={sortBy === 'modified'}
-                    style="background: {sortBy === 'modified' ? 'var(--color-primary)' : 'var(--color-surface)'}; color: {sortBy === 'modified' ? 'white' : 'var(--color-text)'};"
-                    onclick={() => handleSort('modified')}
-                    type="button"
-            >
-                {t('date')} {sortBy === 'modified' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </button>
-            <button
-                    class="text-sm px-3 py-1 rounded-lg transition-colors"
-                    class:font-medium={sortBy === 'size'}
-                    style="background: {sortBy === 'size' ? 'var(--color-primary)' : 'var(--color-surface)'}; color: {sortBy === 'size' ? 'white' : 'var(--color-text)'};"
-                    onclick={() => handleSort('size')}
-                    type="button"
-            >
-                {t('size')} {sortBy === 'size' && (sortOrder === 'asc' ? '↑' : '↓')}
-            </button>
+
+        <div class="flex items-center flex-wrap gap-1 sm:gap-2 text-secondary">
+            <div class="text-xs sm:text-sm mr-1">{t(sortBy)}:</div>
+            <div class="flex gap-1">
+                <button
+                        class="text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1 rounded-lg transition-colors whitespace-nowrap"
+                        class:font-medium={sortBy === 'name'}
+                        style="background: {sortBy === 'name' ? 'var(--color-primary)' : 'var(--color-surface)'}; color: {sortBy === 'name' ? 'white' : 'var(--color-text)'};"
+                        onclick={() => handleSort('name')}
+                        type="button"
+                >
+                    {t('name')} {sortBy === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                </button>
+                <button
+                        class="text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1 rounded-lg transition-colors whitespace-nowrap"
+                        class:font-medium={sortBy === 'modified'}
+                        style="background: {sortBy === 'modified' ? 'var(--color-primary)' : 'var(--color-surface)'}; color: {sortBy === 'modified' ? 'white' : 'var(--color-text)'};"
+                        onclick={() => handleSort('modified')}
+                        type="button"
+                >
+                    {t('date')} {sortBy === 'modified' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                </button>
+                <button
+                        class="text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1 rounded-lg transition-colors whitespace-nowrap"
+                        class:font-medium={sortBy === 'size'}
+                        style="background: {sortBy === 'size' ? 'var(--color-primary)' : 'var(--color-surface)'}; color: {sortBy === 'size' ? 'white' : 'var(--color-text)'};"
+                        onclick={() => handleSort('size')}
+                        type="button"
+                >
+                    {t('size')} {sortBy === 'size' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                </button>
+            </div>
         </div>
     </div>
 
-    <div class="flex-1 min-h-0 rounded-xl overflow-hidden flex flex-col">
-        <div class="grid grid-cols-12 gap-4 p-4 bg-surface border-b border-border-light">
-            <div class="col-span-6 font-medium text-sm text-secondary">{t('name')}</div>
-            <div class="col-span-3 font-medium text-sm text-secondary">{t('size')}</div>
-            <div class="col-span-3 font-medium text-sm text-secondary">{t('modified')}</div>
+    <div class="flex-1 min-h-0 rounded-lg sm:rounded-xl overflow-hidden flex flex-col bg-card">
+        <div class="hidden sm:grid sm:grid-cols-12 gap-3 md:gap-4 p-3 md:p-4 bg-surface border-b border-border-light">
+            <div class="sm:col-span-6 md:col-span-6 font-medium text-sm text-secondary">{t('name')}</div>
+            <div class="sm:col-span-3 md:col-span-3 font-medium text-sm text-secondary">{t('size')}</div>
+            <div class="sm:col-span-3 md:col-span-3 font-medium text-sm text-secondary">{t('modified')}</div>
+        </div>
+
+        <div class="sm:hidden p-3 border-b border-border-light bg-surface">
+            <div class="font-medium text-sm text-secondary">{t('items')}: {items.length}</div>
         </div>
 
         <div class="flex-1 overflow-y-auto" role="listbox" aria-label="File list">
             {#if paginatedItems().length === 0}
-                <div class="p-8 text-center" style="color: var(--color-text-secondary);">
+                <div class="p-6 sm:p-8 text-center" style="color: var(--color-text-secondary);">
                     {t('noFiles')}
                 </div>
             {/if}
 
             {#each paginatedItems() as item (item.id)}
-                <div
-                        draggable="true"
-                        ondragstart={() => draggingId = item.id}
-                        ondragend={() => draggingId = null}
-                        ondragover={(e) => item.type === 'dir' && e.preventDefault()}
-                        class:ring-2={draggingId !== null && item.type === 'dir'}
-                        ondrop={async (e) => {
+                {#if !isMobile}
+                    <div
+                            draggable="true"
+                            ondragstart={() => draggingId = item.id}
+                            ondragend={() => draggingId = null}
+                            ondragover={(e) => item.type === 'dir' && e.preventDefault()}
+                            class:ring-2={draggingId !== null && item.type === 'dir'}
+                            ondrop={async (e) => {
                             if (item.type !== 'dir') return;
                             e.preventDefault();
                             if (!draggingId || draggingId === item.id) return;
-
                             await api.moveFile(draggingId, item.id);
                             draggingId = null;
                             await load();
                         }}
-                        class="grid grid-cols-12 gap-4 p-4 border-b border-border-light hover:bg-card-hover transition-colors duration-150 cursor-pointer"
-                        onclick={() => open(item)}
-                        oncontextmenu={(e) => handleContextMenu(e, item)}
-                        onkeydown={(e) => handleFileKeydown(e, item)}
-                        role="option"
-                        tabindex="0"
-                        aria-selected={selectedFileId === item.id ? 'true' : 'false'}
-                        aria-label="{item.name}, {item.type === 'dir' ? 'Folder' : 'File'}"
-                >
-                    <div class="col-span-6 flex items-center space-x-3">
-                        <span class="text-xl">{getFileIcon(item.type, item.mime)}</span>
-                        <div>
-                            <div class="font-medium" style="color: var(--color-text);">{item.name}</div>
-                            <div class="text-xs" style="color: var(--color-text-secondary);">
-                                {item.type === 'dir' ? t('dir') : (item.mime || t('file'))}
+                            class="hidden sm:grid sm:grid-cols-12 gap-3 md:gap-4 p-3 md:p-4 border-b border-border-light hover:bg-card-hover transition-colors duration-150 cursor-pointer"
+                            onclick={() => open(item)}
+                            oncontextmenu={(e) => handleContextMenu(e, item)}
+                            onkeydown={(e) => handleFileKeydown(e, item)}
+                            role="option"
+                            tabindex="0"
+                            aria-selected={selectedFileId === item.id ? 'true' : 'false'}
+                            aria-label="{item.name}, {item.type === 'dir' ? 'Folder' : 'File'}"
+                    >
+                        <div class="sm:col-span-6 md:col-span-6 flex items-center space-x-3">
+                            <span class="text-xl">{getFileIcon(item.type, item.mime)}</span>
+                            <div class="min-w-0">
+                                <div class="font-medium text-sm md:text-base truncate" style="color: var(--color-text);">{item.name}</div>
+                                <div class="text-xs" style="color: var(--color-text-secondary);">
+                                    {item.type === 'dir' ? t('dir') : (item.mime || t('file'))}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sm:col-span-3 md:col-span-3 flex items-center text-xs md:text-sm text-secondary truncate">
+                            {item.type === 'file' ? humanSize(item.size) : ''}
+                        </div>
+                        <div class="sm:col-span-3 md:col-span-3 flex items-center text-xs md:text-sm text-secondary truncate">
+                            {fmtDate(item.modified)}
+                        </div>
+                    </div>
+                {:else}
+                    <div
+                            draggable="true"
+                            ondragstart={() => draggingId = item.id}
+                            ondragend={() => draggingId = null}
+                            ondragover={(e) => item.type === 'dir' && e.preventDefault()}
+                            class:ring-2={draggingId !== null && item.type === 'dir'}
+                            ondrop={async (e) => {
+                            if (item.type !== 'dir') return;
+                            e.preventDefault();
+                            if (!draggingId || draggingId === item.id) return;
+                            await api.moveFile(draggingId, item.id);
+                            draggingId = null;
+                            await load();
+                        }}
+                            class="sm:hidden p-3 border-b border-border-light hover:bg-card-hover transition-colors duration-150 cursor-pointer"
+                            onclick={() => open(item)}
+                            oncontextmenu={(e) => handleContextMenu(e, item)}
+                            onkeydown={(e) => handleFileKeydown(e, item)}
+                            role="option"
+                            tabindex="0"
+                            aria-selected={selectedFileId === item.id ? 'true' : 'false'}
+                            aria-label="{item.name}, {item.type === 'dir' ? 'Folder' : 'File'}"
+                    >
+                        <div class="flex items-start space-x-3">
+                            <span class="text-2xl mt-1 flex-shrink-0">{getFileIcon(item.type, item.mime)}</span>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div class="min-w-0">
+                                        <div class="font-medium text-base truncate" style="color: var(--color-text);">
+                                            {item.name}
+                                        </div>
+                                        <div class="text-xs mt-1" style="color: var(--color-text-secondary);">
+                                            {item.type === 'dir' ? t('dir') : (item.mime || t('file'))}
+                                            {#if item.type === 'file' && item.size}
+                                                • {humanSize(item.size)}
+                                            {/if}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-xs mt-2" style="color: var(--color-text-secondary);">
+                                    {fmtDate(item.modified)}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-span-3 flex items-center text-sm text-secondary">
-                        {item.type === 'file' ? humanSize(item.size) : ''}
-                    </div>
-                    <div class="col-span-3 flex items-center text-sm text-secondary">
-                        {fmtDate(item.modified)}
-                    </div>
-                </div>
+                {/if}
             {/each}
         </div>
 
-            <div class="p-4 border-t border-border-light flex color-surface items-center justify-between" style="flex-shrink: 0;">
-                <div class="text-sm" style="color: var(--color-text-secondary);">
-                    {t('page')} {currentPage} {t('of')} {totalPages()}
-                </div>
-                <div class="flex items-center space-x-2">
-                    <button
-                            class="px-3 py-1 rounded-lg text-sm bg-surface text-text transition-colors disabled:opacity-50"
-                            style="border: 1px solid var(--color-border);"
-                            onclick={prevPage}
-                            disabled={currentPage === 1}
-                            type="button"
-                    >
-                        {t('back')}
-                    </button>
-                    <div class="flex items-center space-x-1">
-                        {#each pageNumbers() as page}
-                            <button
-                                    class="w-8 h-8 rounded-lg text-sm transition-colors"
-                                    style="background: {currentPage === page ? 'var(--color-primary)' : 'var(--color-surface)'}; color: {currentPage === page ? 'white' : 'var(--color-text)'}; border: 1px solid var(--color-border);"
-                                    onclick={() => goToPage(page)}
-                                    type="button"
-                            >
-                                {page}
-                            </button>
-                        {/each}
-                    </div>
-                    <button
-                            class="px-3 py-1 rounded-lg text-sm bg-surface color-text transition-colors disabled:opacity-50"
-                            style="border: 1px solid var(--color-border);"
-                            onclick={nextPage}
-                            disabled={currentPage === totalPages()}
-                            type="button"
-                    >
-                        {t('forward')}
-                    </button>
-                </div>
+        <div class="p-3 sm:p-4 border-t border-border-light flex color-surface items-center justify-between" style="flex-shrink: 0;">
+            <div class="text-xs sm:text-sm" style="color: var(--color-text-secondary);">
+                {t('page')} {currentPage} {t('of')} {totalPages()}
             </div>
+            <div class="flex items-center space-x-1 sm:space-x-2">
+                <button
+                        class="px-2 py-1 sm:px-3 sm:py-1 rounded-lg text-xs sm:text-sm bg-surface text-text transition-colors disabled:opacity-50 min-w-[60px]"
+                        style="border: 1px solid var(--color-border);"
+                        onclick={prevPage}
+                        disabled={currentPage === 1}
+                        type="button"
+                >
+                    {t('back')}
+                </button>
+                <div class="flex items-center space-x-1">
+                    {#each pageNumbers() as page}
+                        <button
+                                class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs sm:text-sm transition-colors flex items-center justify-center"
+                                style="background: {currentPage === page ? 'var(--color-primary)' : 'var(--color-surface)'}; color: {currentPage === page ? 'white' : 'var(--color-text)'}; border: 1px solid var(--color-border); min-width: 28px;"
+                                onclick={() => goToPage(page)}
+                                type="button"
+                        >
+                            {page}
+                        </button>
+                    {/each}
+                </div>
+                <button
+                        class="px-2 py-1 sm:px-3 sm:py-1 rounded-lg text-xs sm:text-sm bg-surface color-text transition-colors disabled:opacity-50 min-w-[60px]"
+                        style="border: 1px solid var(--color-border);"
+                        onclick={nextPage}
+                        disabled={currentPage === totalPages()}
+                        type="button"
+                >
+                    {t('forward')}
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -473,3 +542,37 @@
             onClose={() => { showCreate = false; load(); }}
     />
 {/if}
+
+<style>
+    @media (max-width: 768px) {
+        .grid-cols-12 {
+            gap: 12px !important;
+        }
+
+        .p-3 {
+            padding: 12px !important;
+        }
+
+        .space-y-3 > * + * {
+            margin-top: 12px !important;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .p-3 {
+            padding: 10px !important;
+        }
+
+        .text-base {
+            font-size: 0.9375rem !important;
+        }
+
+        .text-sm {
+            font-size: 0.8125rem !important;
+        }
+
+        .text-xs {
+            font-size: 0.75rem !important;
+        }
+    }
+</style>
