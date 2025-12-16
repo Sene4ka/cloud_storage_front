@@ -1,0 +1,176 @@
+# Dependencies
+node_modules/
+.npm
+.yarn/
+.pnp.*
+.pnpm-store/
+
+# Build outputs
+.svelte-kit/
+package/
+build/
+dist/
+.output/
+.cache/
+.vite/
+.vercel/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE and Editor
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+modules.xml
+.vscode/
+.vs/
+*.swp
+*.swo
+*~
+.DS_Store
+._*
+Thumbs.db
+
+# OS generated files
+.DS_Store?
+ehthumbs.db
+Icon?
+desktop.ini
+
+# Svelte/SvelteKit specific
+.svelte/
+src-tauri/  # если используете Tauri
+src-cordova/ # если используете Cordova
+
+# Testing
+coverage/
+.nyc_output/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Misc
+*.tgz
+.yarn-integrity
+.yarn/install-state.gz
+.pnp.loader.mjs
+
+# JetBrains IDE (additional)
+.idea_modules/
+*.eml
+*.sassc
+*.class
+*.psd
+*.jar
+*.keystore
+*.orig
+!.settings/org.eclipse.jdt.core.prefs
+!.settings/org.eclipse.core.resources.prefs
+!.settings/org.eclipse.core.runtime.prefs
+
+# Visual Studio Code
+.history/
+*.code-workspace
+
+# Temporary folders
+tmp/
+temp/
+
+# SvelteKit build artifacts
+__sapper__/
+/src/routes/*.svelte-autocomplete  # автодополнение Svelte
+
+# TypeScript
+*.tsbuildinfo
+
+# Package managers
+package-lock.json  # если используете yarn/pnpm
+yarn.lock
+pnpm-lock.yaml
+shrinkwrap.yaml
+
+# Optional npm cache directory
+.npm/_cacache/
+.npm/_logs/
+
+# Optional next.js build output
+.next/
+
+# Optional nuxt.js build output
+.nuxt/
+
+# Optional vuepress build output
+.vuepress/dist/
+
+# Optional serverless
+.serverless/
+
+# Optional Chrome user data
+chrome-user-data/
+
+# Optional production env
+.env.production.local
+
+# Optional ESLint
+.eslintignore
+
+# Optional Prettier
+.prettierignore
+
+# Optional Cypress
+cypress/videos/
+cypress/screenshots/
+
+# Optional Playwright
+playwright/.cache/
+playwright/test-results/
+
+# Optional Jest
+jest-cache/
+jest-coverage/
+
+# Optional Storybook
+storybook-static/
+
+# Optional Vercel
+.vercel/project.json
+.vercel/output/
+
+# Optional Netlify
+.netlify/
+
+# Optional Firebase
+.firebase/
+.firebaserc
+
+# Optional Docker
+.docker/
+
+# Optional local development
+localhost.*
